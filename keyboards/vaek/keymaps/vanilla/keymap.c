@@ -1,4 +1,4 @@
-#include "lfk78_revc.h"
+#include "vaek.h"
 #include "issi.h"
 #include "lighting.h"
 #include "action_layer.h"
@@ -10,6 +10,16 @@ enum keymap_layout {
     BASE = 0,
     FUNC,
     SETTINGS,
+};
+
+// Colors of the layer indicator LED
+// This list needs to define layer 0xFFFFFFFF, it is the end of the list, and the unknown layer
+const Layer_Info layer_info[] = {
+  // Layer      Red     Green   Blue
+  {0x00000000, {0x0000, 0x0FFF, 0x0000}}, // base layer - green
+  {0x00000002, {0x0000, 0x0000, 0x0FFF}}, // function layer - blue
+  {0x00000006, {0x0FFF, 0x0000, 0x0FFF}}, // settings layer - magenta
+  {0xFFFFFFFF, {0x0FFF, 0x0FFF, 0x0FFF}}, // unknown layer - REQUIRED - white
 };
 
   /* Keymap BASE: (Base Layer) Default Layer
@@ -40,11 +50,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    * |---------|  |-------------------------------------------------------------|  |---------|
    * |    |    |  |Tab  |Hom| Up|End|PgU|   |   |   |   |   |   |   |   |       |  | Del|End |
    * |---------|  |-------------------------------------------------------------|  `---------'
-   * |    |    |  |MO(FUNC)|Lft|Dn |Rig|PgD|   |Lft|Dwn| Up|Rgt|   |   |        |
+   * |    |    |  |CAPS    |Lft|Dn |Rig|PgD|   |Lft|Dwn| Up|Rgt|   |   |        |
    * |---------|  |-------------------------------------------------------------|  ,----.
    * |    |    |  |Shift   |   |   |   |   |   |   |   |   |   |   |shift       |  | Up |
    * |---------|  |--------------------------------------------------------------------------.
-   * |    | F10|  |Ctrl|Win |Alt |        PgD            |Alt |Func |CTRL |     |Lft| Dn |Rig |
+   * |    | F10|  |Ctrl|Win |Alt |        PgD            |Alt |Ctrl|Func |     |Lft| Dn |Rig |
    * `---------'  `------------------------------------------------------'     `-------------'
    */
 [FUNC] = KEYMAP(
@@ -55,34 +65,30 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_TR,   KC_TR,    KC_TR,  KC_TR, KC_TR,                  KC_PGDN,                           KC_TR, KC_TR, KC_TR,         KC_TR,  KC_TR, KC_TR),
 
   /* Keymap SETTINGS: Settings Layer
-   * ,---------.  ,-----------------------------------------------------------.  ,---------.
-   * |LEDT|    |  |   |   |   |   |   |   |   |   |   |   |   |   |   |Tgl Aud|  |Hz+ |Sec+|
-   * |---------|  |-----------------------------------------------------------|  |---------|
-   * |    |    |  |     |   |   |   |Red|   |   |   |   |   |   |   |   |Debug|  |Hz- |Sec-|
-   * |---------|  |-----------------------------------------------------------|  `---------'
-   * |    |    |  |LayrClr|   |   |   |   |Grn|   |   |   |   |   |   |Tgl LED|
+   * ,---------.  ,-----------------------------------------------------------.  ,-------------.
+   * |    |    |  |RST|   |   |   |   |   |   |   |   |   |   |BL-|BL+|BL Togl|  |RGB Tog |Val+|
+   * |---------|  |-----------------------------------------------------------|  |-------------|
+   * |    |    |  |DEBUG|   |   |   |   |   |   |   |   |   |   |   |  |LEDTst|  |RGB Mode|Val-|
+   * |---------|  |-----------------------------------------------------------|  `-------------'
+   * |    |    |  |       |   |   |   |   |   |   |   |   |   |   |   |       |
    * |---------|  |-----------------------------------------------------------|  ,----.
-   * |    |    |  |        |   |   |   |   |Blu|   |   |   |   |   |Layer Clr |  |LED+|
+   * |    |    |  |        |   |   |   |   |   |   |   |   |   |   |Layer Clr |  |Hue+|
    * |---------|  |------------------------------------------------------------------------.
-   * | RST| DBG|  |    |    |    |                       |    |    |     |   |   |LED-|    |
-   * `---------'  `------------------------------------------------------'   `-------------'
+   * |    |    |  |    |    |    |                       |    |    |     |  |Sat-|Hue-|Sat+|
+   * `---------'  `------------------------------------------------------'  `--------------'
    */
 [SETTINGS] = KEYMAP(
-  KC_FN4, KC_NO,    KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,    KC_NO,    KC_NO, KC_NO,
-  KC_NO,   KC_NO,    KC_NO, KC_NO, KC_NO, KC_NO, KC_LCTL, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,  KC_NO,    KC_NO, KC_NO,
-  KC_NO,   KC_NO,    KC_FN0,  KC_NO, KC_NO, KC_NO, KC_NO, KC_LALT, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,       KC_FN3,
-  KC_NO,   KC_NO,    KC_NO,     KC_NO,  KC_NO,  KC_NO,  KC_NO, KC_LGUI, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,         KC_FN0,    KC_FN1,
-  RESET,   DEBUG,    KC_NO, KC_NO, KC_NO,                  KC_NO,                              KC_NO, KC_NO, KC_NO,    KC_NO, KC_FN2, KC_NO),
+  KC_NO, KC_NO,    RESET, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, BL_DEC, BL_INC, BL_TOGG,    RGB_TOG, RGB_VAI,
+  KC_NO,   KC_NO,    DEBUG,  KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_FN2,    RGB_MOD, RGB_VAD,
+  KC_NO,   KC_NO,    KC_FN0,  KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,       KC_NO,
+  KC_NO,   KC_NO,    KC_NO,    KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO,            KC_FN0,    RGB_HUI,
+  KC_NO,   KC_NO,    KC_NO, KC_NO, KC_NO,                  KC_NO,                         KC_NO, KC_NO, KC_NO,    RGB_SAD, RGB_HUD, RGB_SAI),
 };
-
 
 const uint16_t PROGMEM fn_actions[] = {
     ACTION_FUNCTION(LFK_CLEAR),               // FN0 - reset layers
-    ACTION_FUNCTION(LFK_LED_UP),              // FN1 - increase LED brightness (R/G/B set via ctl/alt/gui modifiers, defaults to backlight)
-    ACTION_FUNCTION(LFK_LED_DOWN),            // FN2 - decrease LED brightness (R/G/B set via ctl/alt/gui modifiers, defaults to backlight)
-    ACTION_FUNCTION(LFK_LED_TOGGLE),          // FN3 - toggle all LEDs
-    ACTION_FUNCTION(LFK_LED_TEST),            // FN4 cycle through LEDs for testing
-    ACTION_FUNCTION(LFK_ESC_TILDE),           // FN5 esc+shift = ~, else escape
+    ACTION_FUNCTION(LFK_ESC_TILDE),           // FN1 - esc+shift = ~, else escape
+    ACTION_FUNCTION(LFK_LED_TEST),            // FN2 - cycle through LEDs for testing
   };
 
 
