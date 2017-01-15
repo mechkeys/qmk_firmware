@@ -114,7 +114,9 @@ bool process_record_kb(uint16_t keycode, keyrecord_t* record)
 {
     // Test code that turns on the switch led for the key that is pressed
     // dprintf("event: %d %d\n", record->event.key.col, record->event.key.row);
+#ifdef BACKLIGHT_ENABLE
     set_backlight_by_keymap(record->event.key.col, record->event.key.row);
+#endif
     if (click_toggle && record->event.pressed){
         click(click_hz, click_time);
     }
