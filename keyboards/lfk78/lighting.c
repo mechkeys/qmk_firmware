@@ -184,6 +184,10 @@ void force_issi_refresh(){
 }
 
 void led_test(){
+#ifdef WATCHDOG_ENABLE
+    // This test take a long time to run, disable the WTD until its complete
+    wdt_disable();
+#endif
     backlight_set(0);
     set_underglow(0, 0, 0);
     force_issi_refresh();
@@ -201,6 +205,9 @@ void led_test(){
         set_rgb(rgb_sequence[x], 0, 0, 0);
         force_issi_refresh();
     }
+#ifdef WATCHDOG_ENABLE
+    wdt_enable(WDTO_250MS);
+#endif
 }
 
 void backlight_init_ports(void){

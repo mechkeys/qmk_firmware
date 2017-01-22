@@ -1,5 +1,6 @@
 #include <avr/sfr_defs.h>
 #include <avr/timer_avr.h>
+#include <avr/wdt.h>
 #include "lfk78.h"
 #include "issi.h"
 #include "TWIlib.h"
@@ -37,6 +38,12 @@ void matrix_init_kb(void)
     // Set as output
     DDRB |= 0b11100000;
 
+#ifdef WATCHDOG_ENABLE
+    // This is done after turning the layer LED red, if we're caught in a loop
+    // we should get a red (flashing?) light
+    wdt_enable(WDTO_250MS);
+#endif
+
 #ifdef AUDIO_ENABLE
     audio_init();
 #else
@@ -52,6 +59,9 @@ void matrix_init_kb(void)
 
 void matrix_scan_kb(void)
 {
+#ifdef WATCHDOG_ENABLE
+    wdt_reset();
+#endif
 #ifdef ISSI_ENABLE
     // switch/underglow lighting update
     static uint32_t issi_device = 0;
