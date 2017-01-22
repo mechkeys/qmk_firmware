@@ -31,7 +31,7 @@ ifeq ($(strip $(ISSI_ENABLE)), yes)
 endif
 
 ifeq ($(strip $(WATCHDOG_ENABLE)), yes)
-    TMK_COMMON_DEFS += -WATCHDOG_ENABLE
+    TMK_COMMON_DEFS += -DWATCHDOG_ENABLE
 endif
 
 

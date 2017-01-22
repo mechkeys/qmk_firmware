@@ -1,13 +1,17 @@
 #ifdef ISSI_ENABLE
 
+
+#include <avr/sfr_defs.h>
+#include <avr/timer_avr.h>
+#include <avr/wdt.h>
 #include "lfk78.h"
 #include "issi.h"
-#include <avr/sfr_defs.h>
-#include "audio/audio.h"
 #include "TWIlib.h"
-#include "avr/timer_avr.h"
 #include "lighting.h"
+#include "debug.h"
 #include "rgblight.h"
+#include "audio/audio.h"
+
 
 extern rgblight_config_t rgblight_config; // Declared in rgblight.c
 
