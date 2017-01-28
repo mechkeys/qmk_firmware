@@ -1,13 +1,17 @@
 #ifdef ISSI_ENABLE
 
+
+#include <avr/sfr_defs.h>
+#include <avr/timer_avr.h>
+#include <avr/wdt.h>
 #include "lfk78.h"
 #include "issi.h"
-#include <avr/sfr_defs.h>
-#include "audio/audio.h"
 #include "TWIlib.h"
-#include "avr/timer_avr.h"
 #include "lighting.h"
+#include "debug.h"
 #include "rgblight.h"
+#include "audio/audio.h"
+
 
 extern rgblight_config_t rgblight_config; // Declared in rgblight.c
 
@@ -96,9 +100,7 @@ const uint8_t rgb_leds[][3][2] = {
 #endif
 
 void set_rgb(uint8_t rgb_led, uint8_t red, uint8_t green, uint8_t blue){
-    if(rgb_led == 24){
-        return;
-    }
+#ifdef RGBLIGHT_ENABLE
     uint8_t matrix = rgb_matrices[0];
     if(rgb_led >= 17){
         matrix = rgb_matrices[1];
@@ -113,14 +115,15 @@ void set_rgb(uint8_t rgb_led, uint8_t red, uint8_t green, uint8_t blue){
     if(rgb_leds[rgb_led][2][1] != 0){
         activateLED(matrix, rgb_leds[rgb_led][2][0], rgb_leds[rgb_led][2][1], blue);
     }
+#endif
 }
 
 void backlight_set(uint8_t level){
-    if(!(issi_devices[0] && issi_devices[3])){
-        // if either of the issi devices failed to init, try again
-        issi_init();
-    }
+#ifdef BACKLIGHT_ENABLE
     uint8_t pwm_value = 0;
+    if(level >= BACKLIGHT_LEVELS){
+        level = BACKLIGHT_LEVELS;
+    }
     if(level > 0){
         pwm_value = backlight_pwm_map[level-1];
     }
@@ -132,16 +135,20 @@ void backlight_set(uint8_t level){
             activateLED(switch_matrices[1], x, y, pwm_value);
         }
     }
+#endif
 }
 
 void set_underglow(uint8_t red, uint8_t green, uint8_t blue){
+#ifdef RGBLIGHT_ENABLE
     for(uint8_t x = 1; x <= 32; x++){
         set_rgb(x, red, green, blue);
     }
+#endif
 }
 
 
 void rgblight_set(void) {
+#ifdef RGBLIGHT_ENABLE
     for(uint8_t i = 0; (i < sizeof(rgb_sequence)) && (i < RGBLED_NUM); i++){
         if(rgblight_config.enable){
             set_rgb(rgb_sequence[i], led[i].r, led[i].g, led[i].b);
@@ -149,9 +156,11 @@ void rgblight_set(void) {
             set_rgb(rgb_sequence[i], 0, 0, 0);
         }
     }
+#endif
 }
 
 void set_backlight_by_keymap(uint8_t col, uint8_t row){
+#ifdef RGBLIGHT_ENABLE
     dprintf("event: %d %d\n", col, row);
     uint8_t lookup_value = switch_leds[row][col];
     uint8_t matrix = switch_matrices[0];
@@ -174,6 +183,7 @@ void set_backlight_by_keymap(uint8_t col, uint8_t row){
 #endif
     dprintf("LED: %02X, %d %d %d\n", lookup_value, matrix, led_col, led_row);
     activateLED(matrix, led_col, led_row, 255);
+#endif
 }
 
 void force_issi_refresh(){
@@ -184,6 +194,10 @@ void force_issi_refresh(){
 }
 
 void led_test(){
+#ifdef WATCHDOG_ENABLE
+    // This test take a long time to run, disable the WTD until its complete
+    wdt_disable();
+#endif
     backlight_set(0);
     set_underglow(0, 0, 0);
     force_issi_refresh();
@@ -201,6 +215,9 @@ void led_test(){
         set_rgb(rgb_sequence[x], 0, 0, 0);
         force_issi_refresh();
     }
+#ifdef WATCHDOG_ENABLE
+    wdt_enable(WDTO_250MS);
+#endif
 }
 
 void backlight_init_ports(void){

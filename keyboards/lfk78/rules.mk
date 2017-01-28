@@ -10,8 +10,10 @@ LFK_REV = D
 
 ifeq ($(LFK_REV), B)
 	MCU = atmega32u4
+	OPT_DEFS += -DBOOTLOADER_SIZE=4096
 else
 	MCU = at90usb1286
+	OPT_DEFS += -DBOOTLOADER_SIZE=8192
 endif
 OPT_DEFS += -DLFK_REV_$(LFK_REV)
 OPT_DEFS += -DUSB_PRODUCT=\"LFK_Rev$(LFK_REV)\"
@@ -60,7 +62,7 @@ OPT_DEFS += -DINTERRUPT_CONTROL_ENDPOINT
 #   Atmel DFU loader 4096
 #   LUFA bootloader  4096
 #   USBaspLoader     2048
-OPT_DEFS += -DBOOTLOADER_SIZE=4096
+# OPT_DEFS += -DBOOTLOADER_SIZE=4096
 
 ifndef QUANTUM_DIR
 	include ../../Makefile
