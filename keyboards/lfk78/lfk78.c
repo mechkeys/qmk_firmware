@@ -38,12 +38,6 @@ void matrix_init_kb(void)
     // Set as output
     DDRB |= 0b11100000;
 
-#ifdef WATCHDOG_ENABLE
-    // This is done after turning the layer LED red, if we're caught in a loop
-    // we should get a red (flashing?) light
-    wdt_enable(WDTO_250MS);
-#endif
-
 #ifdef AUDIO_ENABLE
     audio_init();
 #else
@@ -55,10 +49,17 @@ void matrix_init_kb(void)
 #ifdef ISSI_ENABLE
     issi_init();
 #endif
+#ifdef WATCHDOG_ENABLE
+    // This is done after turning the layer LED red, if we're caught in a loop
+    // we should get a flashing red light
+    wdt_enable(WDTO_500MS);
+#endif
+
 }
 
 void matrix_scan_kb(void)
 {
+    debug_enable = true;
 #ifdef WATCHDOG_ENABLE
     wdt_reset();
 #endif
@@ -76,7 +77,7 @@ void matrix_scan_kb(void)
     if(isTWIReady()){
         twi_last_ready = 0;
         // If the i2c bus is available, kick off the issi update, alternate between devices
-        update_issi(issi_device, 0);
+        update_issi(issi_device, issi_device);
         if(issi_device){
             issi_device = 0;
         }else{
@@ -124,7 +125,7 @@ bool process_record_kb(uint16_t keycode, keyrecord_t* record)
 {
     // Test code that turns on the switch led for the key that is pressed
     // dprintf("event: %d %d\n", record->event.key.col, record->event.key.row);
-    set_backlight_by_keymap(record->event.key.col, record->event.key.row);
+    // set_backlight_by_keymap(record->event.key.col, record->event.key.row);
     if (click_toggle && record->event.pressed){
         click(click_hz, click_time);
     }
@@ -202,6 +203,11 @@ void action_function(keyrecord_t *event, uint8_t id, uint8_t opt)
 }
 
 void reset_keyboard_kb(){
+#ifdef WATCHDOG_ENABLE
+    MCUSR = 0;
+    wdt_disable();
+    wdt_reset();
+#endif
     dprintf("programming!\n");
     OCR1A = 0x0000; // B5 - Red
     OCR1B = 0x0FFF; // B6 - Green
