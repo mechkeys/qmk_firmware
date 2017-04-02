@@ -1,7 +1,11 @@
 #ifndef LFK78_H
 #define LFK78_H
 
-#include "keymap.h"
+/* if the kb.h file exists (because we're running from qmkbuilder) include it */
+#if __has_include("kb.h")
+#include "kb.h"
+#endif
+
 #include "quantum.h"
 #include "matrix.h"
 #include <avr/sfr_defs.h>
@@ -14,9 +18,6 @@
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
 
-#define CLICK_HZ 500
-#define CLICK_MS 2
-#define CLICK_ENABLED 0
 
 typedef struct RGB_Color {
     uint16_t red;
@@ -46,10 +47,14 @@ enum action_functions {
     LFK_LED_TEST            // cycles through switch and RGB LEDs
 };
 
+#define CLICK_HZ 500
+#define CLICK_MS 2
+#define CLICK_ENABLED 0
 
 void reset_keyboard_kb(void);
 void click(uint16_t freq, uint16_t duration);
 
+#ifndef KEYMAP
 #ifdef LFK_REV_B
     /* RevB Keymap */
     // This a shortcut to help you visually see your layout.
@@ -117,6 +122,7 @@ void click(uint16_t freq, uint16_t duration);
         {k41, k42,   k43, KC_NO, k45, k46, k47, k48, k49, k4A, k4B, k4C, k4D, k4E, k4F, KC_NO,   k4H, KC_NO}, \
         {k51, k52,   k53, k54, k55, KC_NO, KC_NO, KC_NO, k59, KC_NO, KC_NO, KC_NO, k5D, k5E, k5F, k5G,   k5H, k5I} \
     }
-#endif
+#endif //LFK_REV_B
+#endif //!KEYMAP
 
 #endif //LFK78_H
