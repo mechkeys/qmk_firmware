@@ -202,7 +202,7 @@ void led_test(){
     set_underglow(0, 0, 0);
     force_issi_refresh();
     set_underglow(0, 0, 0);
-    for(uint8_t x = 1; x < sizeof(rgb_sequence); x++){
+    for(uint8_t x = 0; x < sizeof(rgb_sequence); x++){
         set_rgb(rgb_sequence[x], 255, 0, 0);
         force_issi_refresh();
         _delay_ms(250);

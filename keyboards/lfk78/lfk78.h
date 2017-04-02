@@ -14,6 +14,9 @@
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
 
+#define CLICK_HZ 500
+#define CLICK_MS 2
+#define CLICK_ENABLED 0
 
 typedef struct RGB_Color {
     uint16_t red;
