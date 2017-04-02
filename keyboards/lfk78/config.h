@@ -59,10 +59,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define RGBLIGHT_SAT_STEP 17
 #define RGBLIGHT_VAL_STEP 17
 
-#define CLICK_HZ 500
-#define CLICK_MS 2
-#define CLICK_ENABLED 0
-
 #define TAPPING_TERM 200
 
 /* Debounce reduces chatter (unintended double-presses) - set 0 if debouncing is not needed */
