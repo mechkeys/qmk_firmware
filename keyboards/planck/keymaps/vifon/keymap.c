@@ -62,7 +62,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [_PPG] = { /* Pure Pro: Gaming */
     {_______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______},
     {_______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______},
-    {_______, _______, _______, _______, _______, _______, _______, _______, _______, DF(_RS), _______, _______},
+    {_______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______},
     {_______, _______, XXXXXXX, _______, KM_RS  , _______, _______, KM_LW  , _______, _______, _______, _______},
 },
 [_NM] = { /* Numeric */
@@ -90,7 +90,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     {_______, _______, KC_LGUI, KC_LALT, _______, _______,     _______,        _______, _______, _______, _______, _______}
 },
 [_DYN]= { /* special */
-    {_______,  DYN_REC_START1, DYN_MACRO_PLAY1, _______, _______, _______, _______, _______, KC_INS,  _______, KC_PSCR, KC_PAUS},
+    {_______,  DYN_REC_START1, DYN_MACRO_PLAY1, _______, _______, _______, _______, KC_APP,  KC_INS,  _______, KC_PSCR, KC_PAUS},
     {_______,  DYN_REC_START2, DYN_MACRO_PLAY2, _______, _______, _______, _______, _______, _______, KC_CAPS, KC_SLCK, KC_NLCK},
     {KM_SHLK,  _______,        _______,         _______, _______, _______, _______, _______, _______, _______, _______, _______},
     {_______,  _______,        _______,         _______, _______, _______, _______, _______, _______, _______, _______, _______}
@@ -107,7 +107,8 @@ const uint16_t PROGMEM fn_actions[] = {
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     static uint16_t key_timer;
 
-    if (!process_record_dynamic_macro(keycode, record)) {
+    uint16_t macro_kc = (keycode == MO(_DYN) ? DYN_REC_STOP : keycode);
+    if (!process_record_dynamic_macro(macro_kc, record)) {
         return false;
     }
 
