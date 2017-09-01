@@ -3,9 +3,10 @@ SRC = TWIlib.c issi.c lighting.c
 # Set the LFK78 hardware version.
 #
 # RevA - Green PCB. at90usb1286 Only 3 exist
-# RevB - Black PCB. at90usb646 First public release
+# RevB - We don't talk about RevB
+# RevC - Black PCB. at90usb646 First public release
 #
-# Set to A or B
+# Set to A or C
 LFK_REV = C
 
 ifeq ($(LFK_REV), A)
@@ -17,8 +18,6 @@ else
 endif
 OPT_DEFS += -DLFK_TKL_REV_$(LFK_REV)
 OPT_DEFS += -DUSB_PRODUCT=LFK_ISO_TKL_Rev$(LFK_REV)
-
-MCU = at90usb646
 
 # Processor frequency.
 #     This will define a symbol, F_CPU, in all source code files equal to the
