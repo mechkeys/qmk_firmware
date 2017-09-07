@@ -1,3 +1,7 @@
+# Porting your keyboard to QMK
+
+This page describes the technical details of porting an existing keyboard to QMK. If you're looking to add your keyboard to QMK, please [look through these guidelines](adding_a_keyboard_to_qmk.md)!
+
 If your keyboard is running an Atmega chip (atmega32u4 and others), it's pretty easy to get things setup for compiling your own firmware to flash onto your board. There is a `/util/new_project.sh <keyboard>` script to help get you started - you can simply pass your keyboard's name into the script, and all of the necessary files will be created. The components of each are described below.
 
 ## `/keyboards/<keyboard>/config.h`
@@ -16,7 +20,7 @@ For the `DIODE_DIRECTION`, most hand-wiring guides will instruct you to wire the
 
 `BACKLIGHT_LEVELS` is how many levels exist for your backlight - max is 15, and they are computed automatically from this number.
 
-## `/keyboards/<keyboard>/Makefile`
+## `/keyboards/<keyboard>/rules.mk`
 
 The values at the top likely won't need to be changed, since most boards use the `atmega32u4` chip. The `BOOTLOADER_SIZE` will need to be adjusted based on your MCU type. It's defaulted to the Teensy, since that's the most common controller. Below is quoted from the `Makefile`.
 
@@ -30,15 +34,15 @@ The values at the top likely won't need to be changed, since most boards use the
 OPT_DEFS += -DBOOTLOADER_SIZE=512
 ```
 
-At the bottom of the file, you'll find lots of features to turn on and off - all of these options should be set with `?=` to allow for the keymap overrides. `?=` only assigns if the variable was previously undefined. For the full documenation of these features, see the [Makefile options](#makefile-options).
+At the bottom of the file, you'll find lots of features to turn on and off - all of these options should be set with `?=` to allow for the keymap overrides. `?=` only assigns if the variable was previously undefined. For the full documenation of these features, see the [Makefile options](getting_started_make_guide.md#makefile-options).
 
 ## `/keyboards/<keyboard>/readme.md`
 
-This is where you'll describe your keyboard - please write as much as you can about it! Talking about default functionality/features is useful here. Feel free to link to external pages/sites if necessary. Images can be included here as well. This file will be rendered into a webpage at qmk.fm/keyboards/<keyboard>/.
+This is where you'll describe your keyboard - please write as much as you can about it! Talking about default functionality/features is useful here. Feel free to link to external pages/sites if necessary. Images can be included here as well, as long as they're hosted elsewhere (imgur).
 
 ## `/keyboards/<keyboard>/<keyboard>.c`
 
-This is where all of the custom logic for your keyboard goes - you may not need to put anything in this file, since a lot of things are configured automatically. All of the `*_kb()` functions are defined here. If you modify them, remember to keep the calls to `*_user()`, or things in the keymaps might not work. You can read more about the functions [here](#custom-quantum-functions-for-keyboards-and-keymaps)
+This is where all of the custom logic for your keyboard goes - you may not need to put anything in this file, since a lot of things are configured automatically. All of the `*_kb()` functions are defined here. If you modify them, remember to keep the calls to `*_user()`, or things in the keymaps might not work. You can read more about the functions [here](custom_quantum_functions.md).
 
 ## `/keyboards/<keyboard>/<keyboard>.h`
 

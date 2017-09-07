@@ -19,6 +19,11 @@ endif
 # Otherwise the [OK], [ERROR] and [WARN] messages won't be displayed correctly
 override SILENT := false
 
+QMK_VERSION := $(shell git describe --abbrev=0 --tags 2>/dev/null)
+ifneq ($(QMK_VERSION),)
+$(info QMK Firmware v$(QMK_VERSION))
+endif
+
 ON_ERROR := error_occurred=1
 
 BREAK_ON_ERRORS = no
@@ -309,11 +314,21 @@ define PARSE_SUBPROJECT
     ifneq ($$(CURRENT_SP),allsp)
         # get a list of all keymaps
         KEYMAPS := $$(notdir $$(patsubst %/.,%,$$(wildcard $(ROOT_DIR)/keyboards/$$(CURRENT_KB)/keymaps/*/.)))
+        LAYOUTS :=
+        $$(eval -include $(ROOT_DIR)/keyboards/$$(CURRENT_KB)/rules.mk)
+        KEYBOARD_LAYOUTS := $$(LAYOUTS)
         ifneq ($$(CURRENT_SP),)
             # if the subproject is defined, then also look for keymaps inside the subproject folder
             SP_KEYMAPS := $$(notdir $$(patsubst %/.,%,$$(wildcard $(ROOT_DIR)/keyboards/$$(CURRENT_KB)/$$(CURRENT_SP)/keymaps/*/.)))
             KEYMAPS := $$(sort $$(KEYMAPS) $$(SP_KEYMAPS))
+	        # $$(eval -include $(ROOT_DIR)/keyboards/$$(CURRENT_KB)/$$(CURRENT_SP)/rules.mk)
+        	# KEYBOARD_LAYOUTS := $$(sort $$(KEYBOARD_LAYOUTS) $$(LAYOUTS))
         endif
+
+        LAYOUT_KEYMAPS :=
+        $$(foreach LAYOUT,$$(KEYBOARD_LAYOUTS),$$(eval LAYOUT_KEYMAPS += $$(notdir $$(patsubst %/.,%,$$(wildcard $(ROOT_DIR)/layouts/*/$$(LAYOUT)/*/.)))))
+        
+        KEYMAPS := $$(sort $$(KEYMAPS) $$(LAYOUT_KEYMAPS))
         # if the rule after removing the start of it is empty (we haven't specified a kemap or target)
         # compile all the keymaps
         ifeq ($$(RULE),)
@@ -419,7 +434,7 @@ define BUILD_TEST
     MAKE_TARGET := $2
     COMMAND := $1
     MAKE_CMD := $$(MAKE) -r -R -C $(ROOT_DIR) -f build_test.mk $$(MAKE_TARGET)
-    MAKE_VARS := TEST=$$(TEST_NAME)
+    MAKE_VARS := TEST=$$(TEST_NAME) FULL_TESTS="$$(FULL_TESTS)"
     MAKE_MSG := $$(MSG_MAKE_TEST)
     $$(eval $$(call BUILD))
     ifneq ($$(MAKE_TARGET),clean)
@@ -483,6 +498,8 @@ define RUN_TEST
 +error_occurred=0;\
 $($(TEST)_COMMAND)\
 if [ $$error_occurred -gt 0 ]; then $(HANDLE_ERROR); fi;
+
+
 endef
 
 # Allow specifying just the subproject, in the keyboard directory, which will compile all keymaps
@@ -497,6 +514,9 @@ $(SUBPROJECTS): %: %-allkm
 	cmp $(ROOT_DIR)/Makefile $(ROOT_DIR)/Makefile >/dev/null 2>&1; if [ $$? -gt 0 ]; then printf "$(MSG_NO_CMP)"; exit 1; fi;
 	# Check if the submodules are dirty, and display a warning if they are
 ifndef SKIP_GIT
+	if [ ! -e lib/chibios ]; then git submodule sync lib/chibios && git submodule update --init lib/chibios; fi
+	if [ ! -e lib/chibios-contrib ]; then git submodule sync lib/chibios-contrib && git submodule update --init lib/chibios-contrib; fi
+	if [ ! -e lib/ugfx ]; then git submodule sync lib/ugfx && git submodule update --init lib/ugfx; fi
 	git submodule status --recursive 2>/dev/null | \
 	while IFS= read -r x; do \
 		case "$$x" in \
@@ -533,6 +553,14 @@ test: test-all
 
 .PHONY: test-clean
 test-clean: test-all-clean
+
+lib/%:
+	git submodule sync $?
+	git submodule update --init $?
+
+git-submodule:
+	git submodule sync --recursive
+	git submodule update --init --recursive
 
 ifdef SKIP_VERSION
 SKIP_GIT := yes
